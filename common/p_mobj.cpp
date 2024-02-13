@@ -80,6 +80,9 @@ EXTERN_CVAR(co_realactorheight)
 EXTERN_CVAR(sv_teamspawns)
 EXTERN_CVAR(sv_nomonsters)
 EXTERN_CVAR(sv_monstersrespawn)
+EXTERN_CVAR(sv_monstersrespawntime)
+EXTERN_CVAR(sv_monstersrespawnperiod)
+EXTERN_CVAR(sv_monstersrespawnchance)
 EXTERN_CVAR(sv_monstershealth)
 EXTERN_CVAR(co_fixweaponimpacts)
 EXTERN_CVAR(co_fineautoaim)
@@ -819,13 +822,18 @@ void AActor::RunThink ()
 
 		movecount++;
 
-		if (movecount < G_GetCurrentSkill().respawn_counter * TICRATE)
+		if (movecount < G_GetCurrentSkill().respawn_counter * TICRATE
+			// Attempt to start respawning monsters after specified time
+			&& movecount < sv_monstersrespawntime * TICRATE)
 			return;
 
-		if (level.time & 31)
+		// Only attempt to respawn every time the spawn period has elapsed
+		if (movecount % (int)(sv_monstersrespawnperiod * TICRATE))
 			return;
 
-		if (P_Random (this) > 4)
+		// Is it safe to use a random number not tied to game state here,
+		// since only the server is responsible for monster respawning?
+		if (P_Random() > sv_monstersrespawnchance)
 			return;
 
 		P_NightmareRespawn (this);
