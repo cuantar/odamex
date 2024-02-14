@@ -54,6 +54,12 @@ EXTERN_CVAR (co_nosilentspawns)
 EXTERN_CVAR (sv_fastmonsters)
 EXTERN_CVAR (sv_freelook)
 EXTERN_CVAR (sv_teamsinplay)
+EXTERN_CVAR(sv_coopcaches);
+EXTERN_CVAR(sv_coopcaches_all);
+EXTERN_CVAR(sv_coopcaches_ammo);
+EXTERN_CVAR(sv_coopcaches_weapons);
+EXTERN_CVAR(sv_coopcaches_health);
+EXTERN_CVAR(sv_coopcaches_armor);
 
 gameaction_t	gameaction;
 gamestate_t 	gamestate = GS_STARTUP;
@@ -245,6 +251,25 @@ void G_PlayerReborn (player_t &p) // [Toke - todo] clean this function
 	p.backpack = false;
 
 	G_GiveSpawnInventory(p);
+
+	// G_GiveCoopCacheItems(p);
+	// now give the player a share of the caches
+	if (G_IsCoopGame() && sv_coopcaches)
+	{
+		if (sv_coopcaches_weapons || sv_coopcaches_all)
+		{
+		}
+		if (sv_coopcaches_ammo || sv_coopcaches_all)
+		{
+		}
+		if (sv_coopcaches_health || sv_coopcaches_all)
+		{
+		}
+		if (sv_coopcaches_armor || sv_coopcaches_all)
+		{
+		}
+	}
+
 
 	p.usedown = p.attackdown = true;	// don't do anything immediately
 	p.playerstate = PST_LIVE;

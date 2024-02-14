@@ -436,4 +436,28 @@ CVAR_RANGE_FUNC_DECL(net_sndbuf, "131072", "Net send buffer size in bytes",
 CVAR(				sv_weapondrop, "0", "Enable/disable weapon drop.",
 					CVARTYPE_BOOL, CVAR_SERVERARCHIVE | CVAR_SERVERINFO)
 
+CVAR(				sv_coopcaches, "0",
+					"Enable shared loot caches for coop respawn inventory",
+					CVARTYPE_BOOL, CVAR_SERVERARCHIVE | CVAR_SERVERINFO)
+
+CVAR(				sv_coopcaches_all, "1",
+					"Enable all coop caches (requires sv_coopcaches)",
+					CVARTYPE_BOOL, CVAR_SERVERARCHIVE | CVAR_SERVERINFO)
+
+CVAR(				sv_coopcaches_ammo, "0",
+					"Enable ammo cache (requires sv_coopcaches; ignored by sv_coopcaches_all)",
+					CVARTYPE_BOOL, CVAR_SERVERARCHIVE | CVAR_SERVERINFO)
+
+CVAR(				sv_coopcaches_weapons, "0",
+					"Enable weapons cache (requires sv_coopcaches; ignored by sv_coopcaches_all)",
+					CVARTYPE_BOOL, CVAR_SERVERARCHIVE | CVAR_SERVERINFO)
+
+CVAR(				sv_coopcaches_health, "0",
+					"Enable health cache (requires sv_coopcaches; ignored by sv_coopcaches_all)",
+					CVARTYPE_BOOL, CVAR_SERVERARCHIVE | CVAR_SERVERINFO)
+
+CVAR(				sv_coopcaches_armor, "0",
+					"Enable armor cache (requires sv_coopcaches; ignored by sv_coopcaches_all)",
+					CVARTYPE_BOOL, CVAR_SERVERARCHIVE | CVAR_SERVERINFO)
+
 VERSION_CONTROL (c_cvarlist_cpp, "$Id$")

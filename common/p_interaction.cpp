@@ -64,6 +64,11 @@ EXTERN_CVAR(cl_predictpickup)
 EXTERN_CVAR(co_zdoomsound)
 EXTERN_CVAR(co_globalsound)
 EXTERN_CVAR(g_lives)
+EXTERN_CVAR(sv_coopcaches_all)
+EXTERN_CVAR(sv_coopcaches_ammo)
+EXTERN_CVAR(sv_coopcaches_weapons)
+EXTERN_CVAR(sv_coopcaches_health)
+EXTERN_CVAR(sv_coopcaches_armor)
 
 // sapientlion - experimental
 EXTERN_CVAR(sv_weapondrop)
@@ -329,7 +334,26 @@ ItemEquipVal P_GiveAmmo(player_t *player, ammotype_t ammotype, float num)
 
 	if (player->ammo[ammotype] == player->maxammo[ammotype])
     {
-		return IEV_NotEquipped;
+		// if collective:  pick up and add to ammo-cache
+		if (G_IsCoopGame() && (sv_coopcaches_ammo || sv_coopcaches_all))
+		{
+			// do nothing; the code below executes later less compactly
+			/*
+			if (sv_doubleammo)
+			{
+				coopcache->ammo[ammotype] += clipammo[ammotype]*G_GetCurrentSkill().double_ammo_factor;
+			}
+			else
+			{
+				coopcache->ammo[ammotype] += clipammo[ammotype]*G_GetCurrentSkill().ammo_factor;
+			}
+			return IEV_EquipRemove;
+			*/
+		}
+		// previous behavior
+		else {
+			return IEV_NotEquipped;
+		}
     }
 
 	if (num)
@@ -357,6 +381,11 @@ ItemEquipVal P_GiveAmmo(player_t *player, ammotype_t ammotype, float num)
 
 	if (player->ammo[ammotype] > player->maxammo[ammotype])
     {
+		// if collective:  add to ammo-cache
+		if (G_IsCoopGame() && (sv_coopcaches_ammo || sv_coopcaches_all))
+		{
+			coopcache->ammo[ammotype] += player->maxammo[ammotype] - player->ammo[ammotype];
+		}
 		player->ammo[ammotype] = player->maxammo[ammotype];
     }
 
@@ -441,7 +470,16 @@ ItemEquipVal P_GiveWeapon(player_t *player, weapontype_t weapon, BOOL dropped)
 
 	if (player->weaponowned[weapon])
 	{
-		gaveweapon = false;
+		// if collective:  add to weapons-cache
+		if (G_IsCoopGame() && (sv_coopcaches_weapons || sv_coopcaches_all))
+		{
+			coopcache->weapons[weapon]++;
+			gaveweapon = true;
+		}
+		else
+		{
+			gaveweapon = false;
+		}
 	}
 	else
 	{
@@ -465,12 +503,30 @@ ItemEquipVal P_GiveBody(player_t *player, int num)
 {
 	if (player->health >= MAXHEALTH)
 	{
-		return IEV_NotEquipped;
+		// if collective:  add to health-cache
+		if (G_IsCoopGame() && (sv_coopcaches_health || sv_coopcaches_all))
+		{
+			// do nothing for now; code below executes later
+			/*
+			coopcache->health += num;
+			return IEV_EquipRemove;
+			*/
+		}
+		else
+		{
+			// original behavior: don't pick it up
+			return IEV_NotEquipped;
+		}
 	}
 
 	player->health += static_cast<int>(static_cast<float>(num) * G_GetCurrentSkill().health_factor);
 	if (player->health > MAXHEALTH)
 	{
+		// if collective:  add to health-cache
+		if (G_IsCoopGame() && (sv_coopcaches_health || sv_coopcaches_all))
+		{
+			coopcache->health += player->health - MAXHEALTH;
+		}
 		player->health = MAXHEALTH;
 	}
 	player->mo->health = player->health;
@@ -488,7 +544,18 @@ ItemEquipVal P_GiveArmor(player_t *player, int armortype)
 	const int hits = armortype * 100;
 	if (player->armorpoints >= hits)
 	{
-		return IEV_NotEquipped;	// don't pick up
+		// if collective:  add to armor-cache
+		if (G_IsCoopGame() && (sv_coopcaches_armor || sv_coopcaches_all))
+		{
+			// do nothing here!  code below executes later
+			// coopcache->armor[armortype] += player->armorpoints;
+			// return IEV_EquipRemove;
+		}
+		else
+		{
+			// original behavior: don't pick up
+			return IEV_NotEquipped;
+		}
 	}
 
 	const int hits_real = static_cast<int>(static_cast<float>(hits) * G_GetCurrentSkill().armor_factor);
@@ -496,7 +563,14 @@ ItemEquipVal P_GiveArmor(player_t *player, int armortype)
 	player->armortype = armortype;
 	player->armorpoints += hits_real;
 	if (player->armorpoints > hits)
+	{
+		// if collective:  add to armor-cache
+		if (G_IsCoopGame() && (sv_coopcaches_armor || sv_coopcaches_all))
+		{
+			coopcache->armor[armortype] += player->armorpoints - hits;
+		}
 		player->armorpoints = hits;
+	}
 
 	return IEV_EquipRemove;
 }
