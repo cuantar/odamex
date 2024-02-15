@@ -824,7 +824,7 @@ void AActor::RunThink ()
 
 		if (movecount < G_GetCurrentSkill().respawn_counter * TICRATE
 			// Attempt to start respawning monsters after specified time
-			&& movecount < sv_monstersrespawn_time * TICRATE)
+			|| movecount < sv_monstersrespawn_time * TICRATE)
 			return;
 
 		// Only attempt to respawn every time the spawn period has elapsed
@@ -833,7 +833,8 @@ void AActor::RunThink ()
 
 		// Is it safe to use a random number not tied to game state here,
 		// since only the server is responsible for monster respawning?
-		if (P_Random() > sv_monstersrespawn_chance)
+		// Let's try the one with a known seed first.
+		if (P_RandomFloat() > sv_monstersrespawn_chance)
 			return;
 
 		P_NightmareRespawn (this);
