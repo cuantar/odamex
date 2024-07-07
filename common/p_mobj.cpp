@@ -80,6 +80,9 @@ EXTERN_CVAR(co_realactorheight)
 EXTERN_CVAR(sv_teamspawns)
 EXTERN_CVAR(sv_nomonsters)
 EXTERN_CVAR(sv_monstersrespawn)
+EXTERN_CVAR(sv_monstersrespawn_time)
+EXTERN_CVAR(sv_monstersrespawn_period)
+EXTERN_CVAR(sv_monstersrespawn_chance)
 EXTERN_CVAR(sv_monstershealth)
 EXTERN_CVAR(co_fixweaponimpacts)
 EXTERN_CVAR(co_fineautoaim)
@@ -776,13 +779,24 @@ void AActor::RunThink ()
 		else
 			respawntimer = 12 * TICRATE;
 
-		if (movecount < respawntimer)
-		return;
-
-		if (level.time & 31)
+		// don't respawn cyberdemons or archviles
+		// TODO: add a CVAR for a list of respawnable mobs
+		if (this->type == MT_CYBORG || this->type == MT_VILE)
 			return;
 
-		if (P_Random (this) > 4)
+		if (movecount < respawntimer
+			// Attempt to start respawning monsters after specified time
+			|| movecount < sv_monstersrespawn_time * TICRATE)
+			return;
+
+		// Only attempt to respawn every time the spawn period has elapsed
+		if (movecount % (int)(sv_monstersrespawn_period * TICRATE))
+			return;
+
+		// Is it safe to use a random number not tied to game state here,
+		// since only the server is responsible for monster respawning?
+		// Let's try the one with a known seed first.
+		if (P_RandomFloat() > sv_monstersrespawn_chance)
 			return;
 
 		P_NightmareRespawn (this);
