@@ -121,10 +121,10 @@ static inline fixed_t R_TexScaleY(fixed_t y, int texnum)
 //
 // Scales a value by the inverse of the horizontal scaling value for texnum
 //
-static inline fixed_t R_TexInvScaleX(fixed_t x, int texnum)
-{
-	return FixedDiv(x, texturescalex[texnum]);
-}
+//static inline fixed_t R_TexInvScaleX(fixed_t x, int texnum) // unused
+//{
+//	return FixedDiv(x, texturescalex[texnum]);
+//}
 
 //
 // R_TexInvScaleY
@@ -676,7 +676,7 @@ void R_RenderMaskedSegRange(drawseg_t* ds, int x1, int x2)
 	mfloorclip = ds->sprbottomclip;
 	mceilingclip = ds->sprtopclip;
 
-	dcol.textureheight = 256*FRACUNIT;
+	dcol.textureheight = 512*FRACUNIT;
 
 	// draw the columns
 	// TODO: change negonearray to the actual top/bottom

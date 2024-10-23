@@ -470,7 +470,7 @@ void MIType_MapName(OScanner& os, bool newStyleMapInfo, void* data, unsigned int
 		if (IsNum(map_name))
 		{
 			const int map = std::atoi(map_name);
-			sprintf(map_name, "MAP%02d", map);
+			snprintf(map_name, 9, "MAP%02d", map);
 		}
 
 		*static_cast<OLumpName*>(data) = map_name;
@@ -955,7 +955,7 @@ bool ScanAndCompareString(OScanner& os, std::string cmp)
 }
 
 //
-bool ScanAndSetRealNum(OScanner& os, fixed_t& num)
+bool ScanAndSetRealNum(OScanner& os, fixed64_t& num)
 {
 	os.scan();
 	if (!IsRealNum(os.getToken().c_str()))
@@ -963,7 +963,7 @@ bool ScanAndSetRealNum(OScanner& os, fixed_t& num)
 		os.warning("Expected number, got \"%s\". Aborting parsing", os.getToken().c_str());
 		return false;
 	}
-	num = FLOAT2FIXED(os.getTokenFloat());
+	num = FLOAT2FIXED64(os.getTokenFloat());
 
 	return true;
 }
@@ -1113,7 +1113,6 @@ struct MapInfoDataSetter<level_pwad_info_t>
 		ENTRY3("fade", &MIType_Color, &ref.fadeto_color)
 		ENTRY3("outsidefog", &MIType_Color, &ref.outsidefog_color)
 		ENTRY3("titlepatch", &MIType_LumpName, &ref.pname)
-		ENTRY3("par", &MIType_Int, &ref.partime)
 		ENTRY3("music", &MIType_MusicLumpName, &ref.music)
 		ENTRY4("nointermission", &MIType_SetFlag, &ref.flags, LEVEL_NOINTERMISSION)
 		ENTRY4("doublesky", &MIType_SetFlag, &ref.flags, LEVEL_DOUBLESKY)
@@ -1161,7 +1160,7 @@ struct MapInfoDataSetter<level_pwad_info_t>
 		ENTRY2("interpic", &MIType_EatNext)
 		ENTRY2("translator", &MIType_EatNext)
 		ENTRY3("compat_shorttex", &MIType_CompatFlag, &ref.flags) // todo: not implemented
-		ENTRY3("compat_limitpain", &MIType_CompatFlag, &ref.flags) // todo: not implemented
+		ENTRY4("compat_limitpain", &MIType_CompatFlag, &ref.flags, LEVEL_COMPAT_LIMITPAIN)
 		ENTRY3("compat_useblocking", &MIType_CompatFlag, &ref.flags) // special lines block use (not implemented, default odamex behavior)
 		ENTRY3("compat_missileclip", &MIType_CompatFlag, &ref.flags) // original height monsters when it comes to missiles (not implemented)
 		ENTRY4("compat_dropoff", &MIType_CompatFlag, &ref.flags, LEVEL_COMPAT_DROPOFF)
@@ -1304,6 +1303,7 @@ void ParseEpisodeInfo(OScanner& os)
 	int new_mapinfo = false; // is int instead of bool for template purposes
 	OLumpName map;
 	std::string pic;
+	std::string name;
 	bool picisgfx = false;
 	bool remove = false;
 	char key = 0;
@@ -1357,7 +1357,7 @@ void ParseEpisodeInfo(OScanner& os)
 			ParseMapInfoHelper<std::string>(os, new_mapinfo);
 
 			if (picisgfx == false)
-				pic = os.getToken();
+				name = os.getToken();
 		}
 		else if (os.compareTokenNoCase("lookup"))
 		{
@@ -1451,7 +1451,8 @@ void ParseEpisodeInfo(OScanner& os)
 				i = episodenum++;
 		}
 
-		EpisodeInfos[i].name = pic;
+		EpisodeInfos[i].pic_name = pic;
+		EpisodeInfos[i].menu_name = name;
 		EpisodeInfos[i].key = static_cast<char>(tolower(key));
 		EpisodeInfos[i].fulltext = !picisgfx;
 		EpisodeInfos[i].noskillmenu = noskillmenu;
@@ -1612,8 +1613,7 @@ void ParseMapInfoLump(int lump, const char* lumpname)
 				// MAPNAME is a number, assume a Hexen wad
 				const int map = std::atoi(map_name);
 
-				sprintf(map_name, "MAP%02d", map);
-				SKYFLATNAME[5] = 0;
+				snprintf(map_name, 9, "MAP%02d", map);
 				HexenHack = true;
 				// Hexen levels are automatically nointermission
 				// and even lighting and no auto sound sequences

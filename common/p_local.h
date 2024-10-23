@@ -47,6 +47,7 @@
 
 // player radius for movement checking
 #define PLAYERRADIUS	16*FRACUNIT
+#define PLAYERRADIUS64	16*FRACUNIT64
 
 // MAXRADIUS is for precalculated sector block boxes
 // the spider demon is larger,
@@ -298,6 +299,7 @@ void	P_LineAttack (AActor *t1, angle_t angle, fixed_t distance, fixed_t slope, i
 // [RH] Position the chasecam
 void	P_AimCamera (AActor *t1);
 extern	fixed_t CameraX, CameraY, CameraZ;
+extern	sector_t* CameraSector;
 
 // [RH] Means of death
 void	P_RadiusAttack (AActor *spot, AActor *source, int damage, int distance, bool hurtSelf, int mod);
@@ -379,8 +381,8 @@ typedef enum
 	PODOOR_NONE,
 	PODOOR_SLIDE,
 	PODOOR_SWING,
-	
-	NUMTYPES	
+
+	NUMTYPES
 } podoortype_t;
 
 inline FArchive &operator<< (FArchive &arc, podoortype_t type)
@@ -491,6 +493,7 @@ BOOL PO_Busy (int polyobj);
 bool P_CheckFov(AActor* t1, AActor* t2, angle_t fov);
 bool P_IsFriendlyThing(AActor* actor, AActor* friendshiptest);
 bool P_IsTeamMate(AActor* actor, AActor* player);
+bool P_IsVoodooDoll(const AActor* mo);
 
 
 //
